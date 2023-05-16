@@ -1,17 +1,120 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>Render 3D Model with WebGL</title>
-  <style>
-    canvas {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
-</head>
-<body>
-  <canvas></canvas>
-  <script src="render.js"></script>
-</body>
+<html>  
+<body>    
+  
+<canvas id="canvas"></canvas>    
+
+<button id="reset">Reset</button>  
+<button id="pause">Pause</button>
+  
+<script>  
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const w = canvas.width=window.innerWidth;
+const h = canvas.height=window.innerHeight;
+let ball={
+x:w/2,
+y:h/2,
+radius:10,
+vx:5,
+vy:5
+};
+let bat={
+x:0,
+y:h/2,
+w:100,
+h:10,
+score:0
+};
+let cpu={
+x:w-100,
+y:h/2,
+w:100,
+h:10,
+score:0
+};
+function drawBall(){
+ctx.beginPath();
+ctx.arc(ball.x, ball.y,ball.radius,0,Math.PI2);
+ctx.fillStyle="yellow";
+ctx.fill();ctx.closePath();
+}
+function drawBats(){
+ctx.fillStyle="red";
+ctx.fillRect(bat.x,bat.y,bat.w,bat.h);
+ctx.fillStyle="blue";
+ctx.fillRect(cpu.x, cpu.y,cpu.w,cpu.h);
+}
+function drawScore(){
+ctx.fillStyle="white";
+ctx.font= "30px sans-serif";
+ctx.fillText(bat.score,w/2-80,40);
+ctx.fillText(cpu.score,w/2+80, 40);
+}
+function draw(){
+ctx.clearRect(0,0,w,h);
+drawBall();
+drawBats();
+drawScore();
+}
+function moveBat(){
+bat.y += (ball.y-bat.y-bat.h/ 2)0.1
+}
+function moveCpu(){
+cpu.y = ball.y-(cpu.h/2)
+}
+draw()
+document.addEventListener("mousemove",function(e){
+bat.y=e.y;
+clamp(bat.y,0,h-bat.h);
+moveBat();
+moveCpu();
+});
+function update(){
+ball.x += ball.vx;
+ball.y += ball.vy;
+if(ball.y+ball.radius > h || ball.y-ball.radius <0){
+ball.vy=-1;
+}
+if(collide(ball,bat)){
+ball.vx=-1;
+}
+if(collide(ball,cpu)){
+ball.vx*=-1;
+}
+if(ball.x+ball.radius > w){
+bat.score++;
+reset();
+}
+if(ball.x-ball.radius < 0){
+cpu.score++;
+reset();
+}
+}
+function reset(){
+ball.x = w/2;
+ball.y = h/2;
+}
+function clamp(n,min,max){
+return n <= min? min : n>=max?max:n
+}
+function collide(b1,b2){
+let b1y= b1.y;
+let b1h = b1.radius;
+let b2y = b2.y;
+let b2h = b2.h;
+if(b1y+b1h >= b2y&& b1y<=b2y+b2h){
+    return true  
+}return false;
+}
+function game(){
+draw();
+update();
+requestAnimationFrame(game);
+}
+game()
+
+ </script>   
+
+</body>   
 </html>
